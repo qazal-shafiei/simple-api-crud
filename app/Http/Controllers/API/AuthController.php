@@ -6,20 +6,24 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use App\Models\User;
-
+use Illuminate\Support\Facades\Validator;
+use JWTAuth;
+use PhpParser\Node\Stmt\TryCatch;
+use Tymon\JWTAuth\Exceptions\JWTException;
 class AuthController extends Controller
 {
     public function register(Request $request)
     {
-        $validatedData = $request->validate([
-            'name' => 'required',
-            'email' => 'email|required|unique:users',
-            'password' => 'required|confirmed',
+        $validator = Validator::make($request->all(), [
+            'name' => 'nullable',
+            'email' => 'required|email|unique:users',
+            'password' => 'required|confirmed'
         ]);
-        $validatedData['password'] = Hash::make($request->password);
-        $user = User::create($validatedData);
-        $accessToken = $user->createToken('authToken')->accessToken;
-        return response(['user' => $user, 'access_token' => $accessToken], 201);
+        if($validator->fails()) {
+            return response(['error' => $validator->errors(), 'Validation Error'], 400);
+        }
+        $user = User::create($request->all());
+            return response(['message' => 'user registered successfully', 'user' => $user], 201);
     }
     public function login(Request $request)
     {
@@ -28,11 +32,12 @@ class AuthController extends Controller
             'password' => 'required'
         ]);
 
-        if (!auth()->attempt($loginData)) {
-            return response(['message' => 'This User does not exist.'], 400);
+        try {
+            $accessToken = JWTAuth::attempt($loginData);
+            return response(['token' => $accessToken, 'message' => 'login successful'], 200);
+        } catch (JWTException $e) {
+            return response(['error' => $e], 400);
         }
-
-        $accessToken = auth()->user()->createToken('authToken')->accessToken;
 
         return response(['user' => auth()->user(), 'access_token' => $accessToken]);
     }
