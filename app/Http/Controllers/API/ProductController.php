@@ -18,7 +18,7 @@ class ProductController extends Controller
     public function index()
     {
         $products = Product::all();
-        return response([ 'projects' => ProductResource::collection($products), 'message' => 'Retrieved successfully'], 200);
+        return response([ 'products' => ProductResource::collection($products), 'message' => 'Retrieved successfully'], 200);
     }
 
     /**
