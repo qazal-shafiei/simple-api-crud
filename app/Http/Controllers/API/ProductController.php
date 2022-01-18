@@ -7,6 +7,8 @@ use App\Models\Product;
 use Illuminate\Http\Request;
 use App\Http\Resources\ProductResource;
 use Illuminate\Support\Facades\Validator;
+use JWTAuth;
+use Tymon\JWTAuth\Exceptions\JWTException;
 
 class ProductController extends Controller
 {
@@ -34,10 +36,14 @@ class ProductController extends Controller
             'name' => 'required',
         ]);
         if($validator->fails()) {
-            return response(['error' => $validator->errors(), 'Validation Error']);
+            return response(['error' => $validator->errors(), 'Validation Error'], 401);
         }
 
-        $product = Product::create($data);
+        try {
+            $product = Product::create($data);
+        } catch (JWTException $e) {
+            return response(['error' => $e->getMessage()], 401);
+        }
         return response(['products' => new ProductResource($product), 'message' => 'product created successfully!'], 201);
     }
 
