@@ -2,13 +2,17 @@
 
 namespace Tests\Feature;
 
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
+use Illuminate\Support\Facades\Hash;
 use Tests\TestCase;
+use JWTAuth;
 
 class UserTest extends TestCase
 {
     use WithFaker;
+
     public function test_registration()
     {
         $response = $this->post('/api/register', [
@@ -23,8 +27,9 @@ class UserTest extends TestCase
 
     public function test_login()
     {
-        $response = $this->post('api/login', [
-            'email' => 'emaill@email.com',
+        $user = User::factory()->create(['password' => Hash::make('123456')]);
+        $response = $this->post('/api/login', [
+            'email' => $user['email'],
             'password' => 123456
         ]);
         $response->assertStatus(200);
