@@ -1,12 +1,12 @@
 <?php
 
-namespace App\Http\Requests\Order;
+namespace App\Http\Requests\OrderItem;
 
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Exceptions\HttpResponseException;
 
-class CreateRequest extends FormRequest
+class DeleteRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -26,29 +26,23 @@ class CreateRequest extends FormRequest
     public function rules()
     {
         return [
-
+            'quantity' => 'required|numeric'
         ];
     }
 
-    /**
-     * @return string[]
-     */
     public function messages()
     {
         return [
+          'quantity.required' => 'quantity field is required.'
         ];
     }
 
-    /**
-     * @param Validator $validator
-     * @return \Illuminate\Http\JsonResponse|void
-     */
     public function failedValidation(Validator $validator)
     {
         throw new HttpResponseException(response()->json([
-           'succsess' => false,
-           'message' => 'validations error',
-           'data' => $validator->errors()
+            'success'   => false,
+            'message'   => 'Validation errors',
+            'data'      => $validator->errors()
         ], 400));
     }
 }
