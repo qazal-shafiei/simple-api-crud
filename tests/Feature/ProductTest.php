@@ -3,7 +3,10 @@
 namespace Tests\Feature;
 
 use App\Models\Product;
+use Dflydev\DotAccessData\Data;
 use Illuminate\Foundation\Testing\WithFaker;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use Tests\TestCase;
 use App\Models\User;
 use JWTAuth;
@@ -29,15 +32,29 @@ class ProductTest extends TestCase
 
     public function test_store_product()
     {
-        $response = $this->call('POST','/api/products',
-            ["name" => $this->faker->firstName],[],[],['HTTP_Authorization' => 'Bearer ' . $this->authorization()['token']],[]);
+        $name = $this->faker->firstName;
+        $response = $this->withHeaders([
+            'Authorization' => 'Bearer '. $this->authorization()['token'],
+        ])->json('POST', '/api/products/', ['name' => $name]);
+
+        $this->assertDatabaseHas('products', [
+            'name' => $name,
+        ]);
         $response->assertStatus(201);
     }
 
     public function test_update_product()
     {
-        $response = $this->call('PUT','/api/products/27',
-            ["name" => $this->faker->firstName],[],[],['HTTP_Authorization' => 'Bearer ' . $this->authorization()['token']],[]);
+        $name = $this->faker->firstName;
+        $product = Product::first();
+
+        $response = $this->withHeaders([
+            'Authorization' => 'Bearer '. $this->authorization()['token'],
+        ])->json('PUT', '/api/products/' . $product->id, ['name' => $name]);
+
+        $this->assertDatabaseHas('products', [
+            'name' => $name,
+        ]);
         $response->assertStatus(200);
     }
 
@@ -45,7 +62,11 @@ class ProductTest extends TestCase
     {
         $product = Product::all()->last();
         $response = $this->call('DELETE', '/api/products/'. $product->id,
-            [], [], [], ['HTTP_Authorization' => 'Bearer' . $this->authorization()['token']], []);
+            ['HTTP_Authorization' => 'Bearer' . $this->authorization()['token']], []);
+
+        $this->assertDatabaseMissing('users', [
+            'name' => $product->name,
+        ]);
         $response->assertStatus(200);
     }
 }

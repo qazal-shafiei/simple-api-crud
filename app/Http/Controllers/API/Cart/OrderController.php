@@ -59,8 +59,6 @@ class OrderController extends Controller
         } catch (JWTException $e) {
             return response()->json(['error' => $e->getMessage()], 401);
         }
-
-
     }
 
     /**
@@ -72,11 +70,10 @@ class OrderController extends Controller
     public function show(Order $order)
     {
         try {
-            $userID = $this->getAuthUser();
                 return response()->json([
                     'items in order' => $order->orderItem()->get(),
                     'order' => $order,
-                    'message' => 'items in order retervied'
+                    'message' => 'items in order retrieved'
                 ], 200);
         } catch (JWTException $e) {
             return response()->json(['error' => $e->getMessage()], 400);
@@ -104,10 +101,9 @@ class OrderController extends Controller
     public function destroy(Order $order)
     {
         try {
-            $userID = $this->getAuthUser();
             $order->delete();
             return response()->json([
-                'message' => 'order deleted successfuly.'
+                'message' => 'order deleted successfully.'
             ], 200);
         } catch (JWTException $e) {
             return response()->json([

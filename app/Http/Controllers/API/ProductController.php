@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\CreateProductRequest;
+use App\Http\Requests\ShowProductRequest;
 use App\Http\Requests\UpdateProductRequest;
 use App\Models\Product;
 use Illuminate\Http\Request;
@@ -30,16 +32,9 @@ class ProductController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
+    public function store(CreateProductRequest $request)
     {
         $data = $request->all();
-        $validator = Validator::make($data, [
-            'name' => 'required',
-        ]);
-        if($validator->fails()) {
-            return response(['error' => $validator->errors(), 'Validation Error'], 401);
-        }
-
         try {
             $product = Product::create($data);
         } catch (JWTException $e) {

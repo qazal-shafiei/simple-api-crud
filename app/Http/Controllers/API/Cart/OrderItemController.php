@@ -10,7 +10,6 @@ use App\Http\Resources\OrderResource;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Product;
-use http\Env\Response;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -46,7 +45,7 @@ class OrderItemController extends Controller
      * Store a newly created resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Http\JsonResponse
      */
     public function store(CreateRequest $request)
     {
@@ -109,7 +108,6 @@ class OrderItemController extends Controller
     public function destroy(OrderItem $orderItem, DeleteRequest $request)
     {
         try {
-            $userID = $this->getAuthUser();
             $productPrice = Product::where('id', $orderItem->product_id)->first();
             if ($orderItem->order->amount > 0 && $orderItem->quantity >= $request->quantity) {
                 DB::table('orders')->where('id', $orderItem->order_id)
@@ -118,7 +116,7 @@ class OrderItemController extends Controller
                 $orderItem->decrement('amount', (int)$productPrice->price * (int)$request->quantity);
             } else {
                 return response()->json([
-                    'error' => 'quantity value is unvalid'
+                    'error' => 'quantity value is invalid'
                 ], 400);
             }
             return response()->json([
